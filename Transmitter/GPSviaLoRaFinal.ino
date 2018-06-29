@@ -52,7 +52,7 @@ void loop()
       }
     }
   }
-  
+  //tmp1 is the number of satellites helping us determine our gps coordinates, tmp2 is the horizontal dilution of position (HDOP), tmp3 is the date
   memset(buffer, '\0', sizeof(buffer));
   tmp1 = print_int(gps.satellites(), TinyGPS::GPS_INVALID_SATELLITES, 5);
   tmp2 = print_int(gps.hdop(), TinyGPS::GPS_INVALID_HDOP, 5);
@@ -74,12 +74,13 @@ void loop()
 
   sprintf(buffer, "%s %s %s %li %li %li", tmp1, tmp2, tmp3, lat, lon, age);
   rf95.send((uint8_t*) buffer, sizeof(buffer));
-  //delay(1000);
   //Serial.print(" should have sent something");
   rf95.waitPacketSent();
 
   Serial.println();
-  smartdelay(1000);
+  //wait a short while for the gps to encode its new coordinates
+  smartdelay(100);
+  //the code stops after 5 transmissions if satellites are not detected, so I added this auto reset function so I don't have to manually reset the transmitter
   if(TinyGPS::GPS_INVALID_SATELLITES){
   r++;
   if(r==5){
