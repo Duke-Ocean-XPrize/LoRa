@@ -11,10 +11,8 @@ SoftwareSerial ss(3, 4); // Arduino RX, TX ,
 
 //Functions
 static void smartdelay(unsigned long ms);
-static char *print_int(unsigned long val, unsigned long invalid, int len);
-static char *print_date(TinyGPS &gps);
-int printFloat(double f, int digits = 2);
-int r = 0;
+//int r = 0;
+long inc=0;
 
 void setup()
 {
@@ -28,18 +26,15 @@ void setup()
 
 }
 
-void(* resetFunc) (void) = 0;
+//void(* resetFunc) (void) = 0;
 
 void loop()
 {
+  bool newdata = false;
   char buffer[100];
-  char *tmp1;
-  char *tmp2;
-  char *tmp3; 
-  long tmp4, tmp5, tmp6;
   long lat, lon;
   unsigned long age;
-  bool newdata = false;
+  
   unsigned long start = millis();
 
   while (millis() - start < 1000) {
@@ -52,58 +47,29 @@ void loop()
       }
     }
   }
-  //tmp1 is the number of satellites helping us determine our gps coordinates, tmp2 is the horizontal dilution of position (HDOP), tmp3 is the date
-  memset(buffer, '\0', sizeof(buffer));
-  tmp1 = print_int(gps.satellites(), TinyGPS::GPS_INVALID_SATELLITES, 5);
-  tmp2 = print_int(gps.hdop(), TinyGPS::GPS_INVALID_HDOP, 5);
-  tmp3 = print_date(gps);
  
-  Serial.print(tmp1);
-  Serial.print(" ");
-  Serial.print(tmp2);
-  Serial.print(" ");
-  Serial.print(tmp3);
-  Serial.print(" "); 
   gps.get_position(&lat, &lon, &age);   
-  Serial.print(lat);
-  Serial.print(" ");  
-  Serial.print(lon); 
-  Serial.print(" ");   
-  Serial.print(age);  
-
-
-  sprintf(buffer, "%s %s %s %li %li %li", tmp1, tmp2, tmp3, lat, lon, age);
-  rf95.send((uint8_t*) buffer, sizeof(buffer));
-  //Serial.print(" should have sent something");
+  char* timestamp = format_timestamp(gps);
+  sprintf(buffer, "%u %lu %s %li %li %li %d", gps.satellites(), gps.hdop(), timestamp, lat, lon, age, inc);
+  inc++;
+  //strcpy(buffer,"POTATO");
+  Serial.println(buffer);
+  rf95.send((uint8_t*) buffer, strlen(buffer));
+ 
   rf95.waitPacketSent();
 
   Serial.println();
   //wait a short while for the gps to encode its new coordinates
   smartdelay(100);
   //the code stops after 5 transmissions if satellites are not detected, so I added this auto reset function so I don't have to manually reset the transmitter
-  if(TinyGPS::GPS_INVALID_SATELLITES){
-  r++;
-  if(r==5){
-    resetFunc(); //reset
-  } else {
-    //continue on
+  /*if(TinyGPS::GPS_INVALID_SATELLITES){
+    r++;
+    if(r==5){
+      resetFunc(); //reset
+    } else {
+      //continue on
     }
-  }
-}
-
-static char *print_int(unsigned long val, unsigned long invalid, int len)
-{
-  int i = 32;
-  char *sz;
-  sz = (char*) malloc (i + 1);
-
-  if (val == invalid)
-    strcpy(sz, "*******");
-  else
-    sprintf(sz, "%ld", val);
-  sz[len] = 0;
-  smartdelay(0);    
-  return sz;
+  }*/
 }
 
 static void smartdelay(unsigned long ms)
@@ -118,26 +84,16 @@ static void smartdelay(unsigned long ms)
   } while (millis() - start < ms);
 }
 
-static char *print_date(TinyGPS &gps)
+static char* format_timestamp(TinyGPS &gps)
 {
-  int i = 32;
-  char *sz;
-  sz = (char*) malloc (i + 1);
+  static char buf[32];
   
   int year;
   byte month, day, hour, minute, second, hundredths;
   unsigned long age;
   gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
-  if (age == TinyGPS::GPS_INVALID_AGE) {
-    strcpy(sz, "******** ****** ");
-  }
-  else
-  {
-    sprintf(sz, "%02d%02d%02d %02d%02d%02d ",
-            month, day, year, hour - 4, minute, second);
-  }
-  print_int(age, TinyGPS::GPS_INVALID_AGE, 5);
+  sprintf(buf, "%02d-%02d-%02d_%02d:%02d:%02d", month, day, year, hour, minute, second);
   smartdelay(0);  
-  return sz;
+  return buf;
 }
 
