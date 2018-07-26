@@ -12,6 +12,7 @@ SoftwareSerial ss(3, 4); // Arduino RX, TX ,
 //Functions
 static void smartdelay(unsigned long ms);
 //int r = 0;
+//inc is the a new feild that helps count how many packets sent
 long inc=0;
 
 void setup()
@@ -34,6 +35,7 @@ void loop()
   char buffer[100];
   long lat, lon;
   unsigned long age;
+  int id=2;
   
   unsigned long start = millis();
 
@@ -50,10 +52,14 @@ void loop()
  
   gps.get_position(&lat, &lon, &age);   
   char* timestamp = format_timestamp(gps);
-  sprintf(buffer, "%u %lu %s %li %li %li %d", gps.satellites(), gps.hdop(), timestamp, lat, lon, age, inc);
+  //sprintf(buffer, "%u %lu %s %li %li %li %d", gps.satellites(), gps.hdop(), timestamp, lat, lon, age, inc);
+  sprintf(buffer, "%d %li %li %li %u %lu %s", id,lat,lon, age, gps.satellites(), gps.hdop(), timestamp);
   inc++;
   //strcpy(buffer,"POTATO");
   Serial.println(buffer);
+
+  
+  //rf95.send((uint8_t*) buffer, strlen(buffer));
   rf95.send((uint8_t*) buffer, strlen(buffer));
  
   rf95.waitPacketSent();
@@ -95,5 +101,3 @@ static char* format_timestamp(TinyGPS &gps)
   sprintf(buf, "%02d-%02d-%02d_%02d:%02d:%02d", month, day, year, hour, minute, second);
   smartdelay(0);  
   return buf;
-}
-
