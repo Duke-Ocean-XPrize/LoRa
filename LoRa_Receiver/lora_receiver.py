@@ -24,33 +24,34 @@ lora.set_modem_config(rf95.Bw125Cr45Sf128)
 # Receive
 
 while True:
-	while not lora.available():
-		pass
-        p_received+=1
-	data=lora.recv()
-	try:
-            data_str = ''.join(chr(x) for x in data)
-            data_str = data_str[4:]
-            tokens = data_str.split()
-            sats = int(tokens[0])
-            hdop = int(tokens[1])
-            timestamp = tokens[2]
-            lat = int(tokens[3])
-            lon = int(tokens[4])
-            age = int(tokens[5])
-            packet = int(tokens[6])
-        except ValueError,e:
-            print "unable to parse: '%s'" % data_str
-            print e
+    while not lora.available():
+            pass
+    p_received+=1
+    data=lora.recv()
+    try:
+        data_str = ''.join(chr(x) for x in data)
+        data_str = data_str[4:]
+        tokens = data_str.split()
+        id = int(tokens[0])
+        lat = int(tokens[1])
+        lon = int(tokens[2])
+        age = int(tokens[3])
+        sats = int(tokens[4])
+        hdop = int(tokens[5])
+        timestamp=tokens[6]
+               
+    except ValueError,e:
+        print "unable to parse: '%s'" % data_str
+        print e
 
         #print(tokens)
-	
-	if(age==-1):
-            print("invalid data: '%s'" % (data_str))
-        else:
-            print "Got data: '%s'" % data_str
-            print "sats=%d hdop=%d ts='%s' lat=%d lon=%d age=%d packet=%d" % (sats,hdop,timestamp,lat,lon,age,packet)
-        print "Pkts: %s/%d = %.1f%%" % (p_received,packet,100.0*p_received/max(1,packet))
+    
+    if(age==-1):
+        print("invalid data: '%s'" % (data_str))
+    else:
+        print "Got data: '%s'" % data_str
+        #print "id=%d lat=%d lon='%s' age=%d sats=%d hdop=%d timestamp=%d " % (id,lat,lon,age,sats,hdop,timestamp)
+   
             
 lora.set_mode_idle()
 
