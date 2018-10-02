@@ -38,7 +38,7 @@ while True:
         age = int(tokens[3])
         sats = int(tokens[4])
         hdop = int(tokens[5])
-        timestamp=tokens[6]
+        #timestamp=tokens[6]
                
     except ValueError as e:
         print ("unable to parse: '%s'" % (data_str))
