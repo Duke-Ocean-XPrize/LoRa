@@ -51,9 +51,9 @@ void loop()
   }
  
   gps.get_position(&lat, &lon, &age);   
-  char* timestamp = format_timestamp(gps);
+//  char* timestamp = format_timestamp(gps);
   //sprintf(buffer, "%u %lu %s %li %li %li %d", gps.satellites(), gps.hdop(), timestamp, lat, lon, age, inc);
-  sprintf(buffer, "%d %li %li %li %u %lu %s", id,lat,lon, age, gps.satellites(), gps.hdop(), timestamp);
+  sprintf(buffer, "%d %li %li %li %u %lu", id,lat,lon, age, gps.satellites(), gps.hdop());
   inc++;
   //strcpy(buffer,"POTATO");
   Serial.println(buffer);
@@ -101,3 +101,4 @@ static char* format_timestamp(TinyGPS &gps)
   sprintf(buf, "%02d-%02d-%02d_%02d:%02d:%02d", month, day, year, hour, minute, second);
   smartdelay(0);  
   return buf;
+}

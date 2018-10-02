@@ -19,7 +19,7 @@ lora.set_modem_config(rf95.Bw125Cr45Sf128)
 
 
 
-#wait untill data is available
+#wait until data is available
 
 # Receive
 
@@ -40,16 +40,16 @@ while True:
         hdop = int(tokens[5])
         timestamp=tokens[6]
                
-    except ValueError,e:
-        print "unable to parse: '%s'" % data_str
-        print e
+    except ValueError as e:
+        print ("unable to parse: '%s'" % (data_str))
+        print(e)
 
         #print(tokens)
     
     if(age==-1):
         print("invalid data: '%s'" % (data_str))
     else:
-        print "Got data: '%s'" % data_str
+        print("Got data: '%s'" % (data_str))
         #print "id=%d lat=%d lon='%s' age=%d sats=%d hdop=%d timestamp=%d " % (id,lat,lon,age,sats,hdop,timestamp)
    
             
